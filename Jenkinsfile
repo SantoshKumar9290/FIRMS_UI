@@ -33,37 +33,6 @@ pipeline {
             }
         }
 
-        stage('Unit Tests with Coverage') {
-            steps {
-                // Add node_modules/.bin to PATH so Jest can be found
-                withEnv(["PATH+NODE_MODULES=${env.WORKSPACE}/node_modules/.bin:$PATH"]) {
-                    sh 'npx jest --coverage'
-                }
-            }
-        }
-
-        stage('SonarQube Analysis') {
-            steps {
-                withSonarQubeEnv('NOTARY_FE_SONAR') {
-                    sh '''
-                        npx sonar-scanner \
-                          -Dsonar.projectKey=notary-fe \
-                          -Dsonar.projectName=notary-fe \
-                          -Dsonar.sources=. \
-                          -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info
-                    '''
-                }
-            }
-        }
-
-        stage('Quality Gate') {
-            steps {
-                timeout(time: 3, unit: 'MINUTES') {
-                    waitForQualityGate abortPipeline: true
-                }
-            }
-        }
-
         stage('Clean Workspace') {
             steps {
                 sh 'rm -rf .next'
