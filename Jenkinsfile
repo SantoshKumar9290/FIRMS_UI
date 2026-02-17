@@ -40,28 +40,24 @@ pipeline {
         }
 
         stage('Deploy with PM2') {
-            steps {
-                sh '''
-                  export PM2_HOME=${PM2_HOME}
+    steps {
+        sh '''
+          export PM2_HOME=${PM2_HOME}
 
-                  if pm2 describe ${APP_NAME} > /dev/null; then
-                    echo "App exists. Restarting..."
-                    pm2 restart ${APP_NAME}
-                  else
-                    echo "App not found. Starting fresh instance..."
-                    pm2 start node_modules/next/dist/bin/next \
-                      --name ${APP_NAME} \
-                      -- start -p ${PORT} -H ${HOST} \
-                      --cwd ${APP_DIR} \
-                      -i 1
-                  fi
+          if pm2 describe ${APP_NAME} > /dev/null; then
+            echo "Restarting app..."
+            pm2 restart ${APP_NAME}
+          else
+            echo "Starting app..."
+            pm2 start npm --name ${APP_NAME} -- start
+          fi
 
-                  pm2 save
-                  pm2 status
-                '''
-            }
-        }
+          pm2 save
+          pm2 status
+        '''
     }
+}
+
 
     post {
         failure {
