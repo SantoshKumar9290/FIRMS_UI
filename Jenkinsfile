@@ -9,7 +9,7 @@ pipeline {
         PORT = '3010'
         HOST = '0.0.0.0'
         APP_NAME = 'notary-fe'
-        APP_DIR = '/var/lib/jenkins/.jenkins/workspace/NOTARY_FE'
+        APP_DIR = '/var/lib/jenkins/.jenkins/workspace/FIRMSFRONTEND'
         PM2_HOME = '/var/lib/jenkins/.pm2'
     }
 
