@@ -2,14 +2,14 @@ pipeline {
     agent any
 
     tools {
-        nodejs 'Node16' // Make sure this matches your Jenkins NodeJS tool name
+        nodejs 'Node16'
     }
 
     environment {
         PORT = '3010'
         HOST = '0.0.0.0'
         APP_NAME = 'FIRMSFRONTEND'
-        APP_DIR = '/var/lib/jenkins/.jenkins/workspace/FIRMSFRONTEND'
+        APP_DIR = "${WORKSPACE}"
         PM2_HOME = '/var/lib/jenkins/.pm2'
     }
 
@@ -22,16 +22,16 @@ pipeline {
         }
 
         stage('Install Dependencies') {
-    steps {
-        sh 'npm ci --legacy-peer-deps'
-    }
-}
+            steps {
+                sh 'npm ci --legacy-peer-deps'
+            }
+        }
 
         stage('Clean Workspace') {
-    steps {
-        sh 'rm -rf .next'
-    }
-}
+            steps {
+                sh 'rm -rf .next'
+            }
+        }
 
         stage('Build App') {
             steps {
@@ -40,57 +40,42 @@ pipeline {
         }
 
         stage('Deploy with PM2') {
-    steps {
-        sh '''
-          export PM2_HOME=${PM2_HOME}
+            steps {
+                sh '''
+                  export PM2_HOME=${PM2_HOME}
 
-          if pm2 describe ${APP_NAME} > /dev/null; then
-            echo "Restarting app..."
-            pm2 restart ${APP_NAME}
-          else
-            echo "Starting app..."
-            pm2 start npm --name ${APP_NAME} -- start
-          fi
+                  if pm2 describe ${APP_NAME} > /dev/null; then
+                    echo "Restarting app..."
+                    pm2 restart ${APP_NAME}
+                  else
+                    echo "Starting app..."
+                    pm2 start npm --name ${APP_NAME} -- start
+                  fi
 
-          pm2 save
-          pm2 status
-        '''
-    }
-}
+                  pm2 save
+                  pm2 status
+                '''
+            }
+        }
 
+    }  // ✅ THIS WAS MISSING (closes stages)
 
     post {
         failure {
-            echo "❌ Build failed. Attempting to revert to last successful commit..."
+            echo "❌ Build failed. Attempting rollback..."
 
             sh '''
               if [ -n "$GIT_PREVIOUS_SUCCESSFUL_COMMIT" ]; then
-                echo "Reverting to commit: $GIT_PREVIOUS_SUCCESSFUL_COMMIT"
                 git fetch --all
                 git checkout $GIT_PREVIOUS_SUCCESSFUL_COMMIT
-
-                npm install
+                npm ci --legacy-peer-deps
                 npm run build
-
-                export PM2_HOME=${PM2_HOME}
-
-                if pm2 describe ${APP_NAME} > /dev/null; then
-                  pm2 restart ${APP_NAME}
-                else
-                  pm2 start node_modules/next/dist/bin/next \
-                    --name ${APP_NAME} \
-                    -- start -p ${PORT} -H ${HOST} \
-                    --cwd ${APP_DIR} \
-                    -i 1
-                fi
-
+                pm2 restart ${APP_NAME}
                 pm2 save
               else
-                echo "⚠ No previous successful build found. Cannot revert."
+                echo "⚠ No previous successful build found."
               fi
             '''
-            echo "🚨 Revert process completed."
         }
     }
 }
-
