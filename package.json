@@ -7,9 +7,9 @@
   "author": "",
   "license": "Critical River Inc.",
   "scripts": {
-    "dev": "next -p 3008",
+    "dev": "next -p 3010",
     "build": "next build && next export",
-    "start": "next start -p 3008",
+    "start": "next start -p 3010",
     "type-check": "tsc",
     "lint": "eslint --ignore-path .gitignore \"src/**/*.+(ts|js|tsx)\"",
     "format": "prettier --ignore-path .gitignore \"src/**/*.+(ts|js|tsx)\" --write",
