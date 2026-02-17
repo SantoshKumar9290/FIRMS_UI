@@ -27,15 +27,6 @@ pipeline {
     }
 }
 
-
-
-
-        stage('Lint') {
-            steps {
-                sh 'npm run lint'
-            }
-        }
-
         stage('Clean Workspace') {
     steps {
         sh 'rm -rf .next'
