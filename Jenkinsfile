@@ -8,7 +8,7 @@ pipeline {
     environment {
         PORT = '3010'
         HOST = '0.0.0.0'
-        APP_NAME = 'notary-fe'
+        APP_NAME = 'FIRMSFRONTEND'
         APP_DIR = '/var/lib/jenkins/.jenkins/workspace/FIRMSFRONTEND'
         PM2_HOME = '/var/lib/jenkins/.pm2'
     }
@@ -22,10 +22,13 @@ pipeline {
         }
 
         stage('Install Dependencies') {
-            steps {
-                sh 'npm install --force'
-            }
-        }
+    steps {
+        sh 'npm ci --legacy-peer-deps'
+    }
+}
+
+
+
 
         stage('Lint') {
             steps {
@@ -34,10 +37,10 @@ pipeline {
         }
 
         stage('Clean Workspace') {
-            steps {
-                sh 'rm -rf .next'
-            }
-        }
+    steps {
+        sh 'rm -rf .next'
+    }
+}
 
         stage('Build App') {
             steps {
